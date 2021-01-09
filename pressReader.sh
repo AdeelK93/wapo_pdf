@@ -1,7 +1,7 @@
 #!/bin/bash
 cd "$(dirname "$0")"
 
-if [ ! -f "cookiex" ]; then
+if [ ! -f "cookie" ]; then
   echo "cookie file does not exist"
   echo "You can find your Washington Post cookie (requires subscribership) by visiting:"
   echo "https://thewashingtonpost.pressreader.com/the-washington-post/"
@@ -26,6 +26,8 @@ main=$(curl --location $mainurl -s --header "Cookie: `cat cookie`")
 token=`echo $main | perl -ne 'print "$1" if /accessToken":"(.*?)"/'`
 echo $token
 
+keys=`curl --location "https://svc.pressreader.com/se2skyservices/IssueInfo/GetPageKeys/?accessToken=${token}&issue=${issue}00000000001001&pageNumber=5" -s`
+sleep 1
 keys=`curl --location "https://svc.pressreader.com/se2skyservices/IssueInfo/GetPageKeys/?accessToken=${token}&issue=${issue}00000000001001&pageNumber=0" -s`
 
 pageKeys=`echo $keys | sed 's/}/}\n/g' | perl -ne 'print "$1 " if /Key":"(.*?)"/'`
