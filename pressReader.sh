@@ -26,6 +26,7 @@ main=$(curl --location $mainurl -s --header "Cookie: `cat cookie`")
 token=`echo $main | perl -ne 'print "$1" if /accessToken":"(.*?)"/'`
 echo $token
 
+# This first key call at a non-free page number appears to be necessary before pageNumber=0 returns angthing
 keys=`curl --location "https://svc.pressreader.com/se2skyservices/IssueInfo/GetPageKeys/?accessToken=${token}&issue=${issue}00000000001001&pageNumber=5" -s`
 sleep 1
 keys=`curl --location "https://svc.pressreader.com/se2skyservices/IssueInfo/GetPageKeys/?accessToken=${token}&issue=${issue}00000000001001&pageNumber=0" -s`
@@ -33,11 +34,11 @@ keys=`curl --location "https://svc.pressreader.com/se2skyservices/IssueInfo/GetP
 pageKeys=`echo $keys | sed 's/}/}\n/g' | perl -ne 'print "$1 " if /Key":"(.*?)"/'`
 keyArray=(${pageKeys})
 
-# https://svc.pressreader.com/se2skyservices/IssueInfo/GetIssueInfoByCid/?accessToken=${token}!!&cid=${cid}
+# https://svc.pressreader.com/se2skyservices/IssueInfo/GetIssueInfoByCid/?accessToken=${token}&cid=${cid}
 # hardcoding these magnifier values
 magW=1728
 magH=3024
-scales=`curl -s  "https://s.prcdn.co/se2skyservices/toc/?callback=tocCallback&issue=${issue}00000000001001&version=3&expungeVersion=" | ./scales.R $magW $magH`
+scales=`curl -s "https://s.prcdn.co/se2skyservices/toc/?callback=tocCallback&issue=${issue}00000000001001&version=3&expungeVersion=" | ./scales.R $magW $magH`
 scaleArray=($(echo $scales | cut -f1 -d ';'))
 lengthArray=($(echo $scales | cut -f2 -d ';'))
 
